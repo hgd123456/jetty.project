@@ -57,19 +57,20 @@ public class MongoTestHelper
 
     static MongoClient mongoClient;
 
-    static 
+    static String mongoHost;
+    static int mongoPort;
+
+    static
     {
         try
         {
             long start = System.currentTimeMillis();
             mongo.start();
-            String mongoHost =  mongo.getHost();
-            int mongoPort = mongo.getMappedPort(27017);
+            mongoHost =  mongo.getHost();
+            mongoPort = mongo.getMappedPort(27017);
             LOG.info("Mongo container started for {}:{} - {}ms", mongoHost, mongoPort,
                      System.currentTimeMillis() - start);
-            mongoClient = new MongoClient(System.getProperty("embedmongoHost"), Integer.getInteger("embedmongoPort"));
-            System.setProperty("embedmongoHost", mongoHost);
-            System.setProperty("embedmongoPort", Integer.toString(mongoPort));
+            mongoClient = new MongoClient(mongoHost, mongoPort);
         }
         catch (Exception e)
         {
@@ -77,8 +78,7 @@ public class MongoTestHelper
             throw new RuntimeException(e);
         }
     }
-
-
+    
     public static MongoClient getMongoClient() throws UnknownHostException
     {
         return mongoClient;
@@ -102,8 +102,8 @@ public class MongoTestHelper
     public static MongoSessionDataStoreFactory newSessionDataStoreFactory()
     {
         MongoSessionDataStoreFactory storeFactory = new MongoSessionDataStoreFactory();
-        storeFactory.setHost(System.getProperty("embedmongoHost"));
-        storeFactory.setPort(Integer.getInteger("embedmongoPort"));
+        storeFactory.setHost(mongoHost);
+        storeFactory.setPort(mongoPort);
         storeFactory.setCollectionName(COLLECTION_NAME);
         storeFactory.setDbName(DB_NAME);
         return storeFactory;
