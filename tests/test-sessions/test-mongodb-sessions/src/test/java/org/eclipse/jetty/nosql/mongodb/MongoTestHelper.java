@@ -57,17 +57,18 @@ public class MongoTestHelper
 
     static MongoClient mongoClient;
 
-    public static void startMongo()
+    static 
     {
         try
         {
             long start = System.currentTimeMillis();
             mongo.start();
-            String containerIpAddress =  mongo.getContainerIpAddress();
+            String mongoHost =  mongo.getHost();
             int mongoPort = mongo.getMappedPort(27017);
-            LOG.info("Mongo container started for {}:{} - {}ms", containerIpAddress, mongoPort,
+            LOG.info("Mongo container started for {}:{} - {}ms", mongoHost, mongoPort,
                      System.currentTimeMillis() - start);
-            System.setProperty("embedmongoHost", containerIpAddress);
+            mongoClient = new MongoClient(System.getProperty("embedmongoHost"), Integer.getInteger("embedmongoPort"));
+            System.setProperty("embedmongoHost", mongoHost);
             System.setProperty("embedmongoPort", Integer.toString(mongoPort));
         }
         catch (Exception e)
@@ -77,24 +78,9 @@ public class MongoTestHelper
         }
     }
 
-    public static void stopMongo()
-    {
-        mongo.stop();
-        mongoClient = null;
-    }
 
     public static MongoClient getMongoClient() throws UnknownHostException
     {
-        boolean restart = false;
-        if (mongo == null || !mongo.isRunning())
-        {
-            startMongo();
-            restart = true;
-        }
-        if (mongoClient == null || restart)
-        {
-            mongoClient = new MongoClient(System.getProperty("embedmongoHost"), Integer.getInteger("embedmongoPort"));
-        }
         return mongoClient;
     }
 
